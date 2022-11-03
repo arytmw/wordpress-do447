@@ -1,0 +1,51 @@
+---
+# tasks file for wordpress
+- name: install prerequisite packages for wordpress
+  ansible.builtin.yum:
+    name: "{{ wordpress_prerequisite_packages }}"
+    state: present
+
+- name: allow service HTTP and HTTPS in the firewall
+  ansible.builtin.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  loop: "{{ wordpress_firewall_services }}"
+
+- name: start and enable the httpd and mariadb services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ wordpress_services }}"
+
+- name: install PyMySQL python package with pip module
+  ansible.builtin.pip:
+    name: PyMySQL
+    state: present
+
+- name: create database named wordpress
+  community.mysql.mysql_db:
+    name: wordpress
+    state: present
+
+- name: create database user and provide complete access to wordpress database
+  community.mysql.mysql_user:
+    name: "{{ wordpress_mysql_username }}"
+    password: "{{ wordpress_mysql_password }}"
+    state: present
+    priv: "wordpress.*:ALL"
+
+- name: copy wordpress/ to /var/www/html/
+  ansible.builtin.synchronize:
+    src: wordpress/
+    dest: /var/www/html/
+
+- name: change ownership and selinux configuration
+  ansible.builtin.file:
+    path: /var/www/html/
+    setype: httpd_sys_rw_content_t
+    recurse: true
+    owner: apache
+    group: apache

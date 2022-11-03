@@ -1,0 +1,22 @@
+---
+# defaults file for wordpress
+wordpress_prerequisite_packages:
+ - php-mysqlnd
+ - php-fpm
+ - mariadb-server
+ - httpd
+ - tar
+ - curl
+ - php-json
+ - python3-pip
+
+wordpress_firewall_services:
+ - http
+ - https
+
+wordpress_services:
+ - httpd
+ - mariadb
+
+wordpress_mysql_username: admin
+wordpress_mysql_password: redhat

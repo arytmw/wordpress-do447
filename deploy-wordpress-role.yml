@@ -1,0 +1,6 @@
+---
+- name: deploy wordpress role
+  hosts: all
+  become: true
+  roles:
+    - wordpress
